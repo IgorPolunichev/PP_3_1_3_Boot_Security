@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit user</title>
+</head>
+<body>
+<form th:method="PATCH" th:action="@{/admin/edit/{id}(id = ${user.getId()})}" th:object="${user}">
+    <input placeholder="User name:" type="text" required th:field="*{userName}" id="User name"/>
+    <br>
+    <br>
+    <input placeholder="Password:" type="text" required th:field="*{password}" id="Password"/>
+    <br>
+    <br>
+    <input type="submit" value="Update!"/>
+    <br>
+    <br>
+</form>
+<table>
+    <tbody>
+    <tr th:each="role :${user.roles}">
+        <td th:text="${role.role}"></td>
+        <td>
+            <form th:method="DELETE" th:action="@{/admin/removeRole/__${user.id}__/__${role.getId()}__}">
+                <input type="submit" value="DELETE"/>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<br>
+<br>
+<form th:method="PATCH" th:action="@{/admin/addRole/{user_id}(user_id = ${user.getId()})}" th:object="${ur}">
+    <select name="roles" id="roleAdd" required th:field="*{role}">
+        <option value="ROLE_USER">ROLE_USER</option>
+        <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+    </select>
+    <input type="submit" value="ADD ROLE"/>
+</form>
+<br>
+<br>
+<input type="button" onclick="history.back();" value="Назад"/>
+
+</body>
+</html>
+
+
