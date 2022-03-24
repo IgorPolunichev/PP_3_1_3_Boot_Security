@@ -9,11 +9,6 @@ public interface Dao {
     User findByUserName(String userName);
 
     void addUser(User user);
-
-    void addRole(Role role);
-
-    Role getRole(Long role);
-
     User getUserById(Long id);
     List<User> listUser();
     void editUser (User user);

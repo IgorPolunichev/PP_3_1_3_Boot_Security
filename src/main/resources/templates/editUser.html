@@ -33,9 +33,11 @@
 <br>
 <br>
 <form th:method="PATCH" th:action="@{/admin/addRole/{user_id}(user_id = ${user.getId()})}" th:object="${ur}">
-    <select name="roles" id="roleAdd" required th:field="*{role}">
-        <option value="ROLE_USER">ROLE_USER</option>
-        <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+    <label for="Role"> Role: </label>
+    <select name="addRole" id="Role">
+        <option value="0"></option>
+        <option value="1">ROLE_USER</option>
+        <option value="2">ROLE_ADMIN</option>
     </select>
     <input type="submit" value="ADD ROLE"/>
 </form>
@@ -45,5 +47,12 @@
 
 </body>
 </html>
+<!--<form th:method="PATCH" th:action="@{/admin/addRole/{user_id}(user_id = ${user.getId()})}" th:object="${ur}">-->
+<!--    <select name="roles" id="roleAdd" required th:field="*{role}">-->
+<!--        <option value="ROLE_USER">ROLE_USER</option>-->
+<!--        <option value="ROLE_ADMIN">ROLE_ADMIN</option>-->
+<!--    </select>-->
+<!--    <input type="submit" value="ADD ROLE"/>-->
+<!--</form>-->
 
 

@@ -14,6 +14,7 @@ public interface MyUserService {
     void removeUser(Long id);
     Role getRole (Long roleName);
     String decoding(String codePass);
+    String[] arrayRoles();
 
 
 

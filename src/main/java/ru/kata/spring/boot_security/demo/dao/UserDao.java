@@ -1,7 +1,6 @@
 package ru.kata.spring.boot_security.demo.dao;
 
 import org.springframework.stereotype.Repository;
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
 
@@ -30,20 +29,6 @@ public class UserDao implements Dao {
         entityManager.persist(user);
     }
 
-    @Transactional
-    @Override
-    public void addRole(Role role) {
-        if (entityManager.find(Role.class, role.getId()) == null) {
-            entityManager.persist(role);
-        }
-    }
-
-
-    @Override
-    public Role getRole(Long role) {
-        return entityManager.find(Role.class, role);
-    }
-
     @Override
     public User getUserById(Long id) {
         User user = entityManager.find(User.class, id);
@@ -60,7 +45,6 @@ public class UserDao implements Dao {
     @Transactional
     public void editUser(User user) {
         entityManager.merge(user);
-
     }
 
     @Override

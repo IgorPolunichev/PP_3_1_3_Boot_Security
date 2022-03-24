@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.services.MyUserService;
+
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,31 +28,27 @@ public class AdminController {
     @GetMapping(value = "/addUser")
     public String addUser(Model model) {
         User user = new User();
-        Role role = new Role();
         model.addAttribute("newUser", user);
-        model.addAttribute("roles", user.getRoles());
-        model.addAttribute("userRole", role);
         return "newUser";
     }
 
     @PostMapping(value = "/addUser")
-    public String createUser(@ModelAttribute("newUser") User user) {
-        User user1 = new User();
-        user1.setPassword(user.getPassword());
-        user1.setUserName(user.getUserName());
+    public String createUser(@ModelAttribute("newUser") User user, HttpServletRequest request) {
         Set<Role> roles = new HashSet<>();
-
-        for (Role role : user.getRoles()) {
-            if (role.getRole().equals("ROLE_ADMIN")) {
+        String[] userRoles = request.getParameterValues("role1");
+//        User user1 = new User();
+//        user1.setPassword(user.getPassword());
+//        user1.setUserName(user.getUserName());
+        for (String roleId : userRoles) {
+            if (Long.parseLong(roleId) == 2L) {
                 roles.add(myUserService.getRole(2L));
             }
-            if (role.getRole().equals("ROLE_USER")) {
+            if (Long.parseLong(roleId) == 1L) {
                 roles.add(myUserService.getRole(1L));
             }
         }
-        user1.setRole(roles);
-
-        myUserService.addUser(user1);
+        user.setRole(roles);
+        myUserService.addUser(user);
         return "redirect:/admin";
     }
 
@@ -64,13 +62,13 @@ public class AdminController {
     @GetMapping(value = "/edit/{id}")
     public String editUser(@PathVariable("id") Long id, ModelMap model) {
         model.addAttribute("user", myUserService.getUserById(id));
-        model.addAttribute("ur", new Role());
         return "editUser";
     }
 
     @PatchMapping("/edit/{id}")
     public String update(@ModelAttribute("user") User user,
                          @PathVariable("id") Long id) {
+
         Set<Role> role = myUserService.getUserById(id).getRoles();
         user.setRole(role);
         myUserService.editUser(user);
@@ -89,19 +87,19 @@ public class AdminController {
     }
 
     @PatchMapping("/addRole/{user_id}")
-    public String addRole(@ModelAttribute("ur") Role role, @PathVariable("user_id") Long id) {
-        if (role.getRole().equals("ROLE_USER")) {
-            User user = myUserService.getUserById(id);
+    public String addRole(HttpServletRequest request, @PathVariable("user_id") Long userId) {
+        String[] userRoles = request.getParameterValues("addRole");
+        if (userRoles[0].equals("1")) {
+            User user = myUserService.getUserById(userId);
             user.addRole(myUserService.getRole(1L));
             myUserService.editUser(user);
-        }
-        if (role.getRole().equals("ROLE_ADMIN")) {
-            User user = myUserService.getUserById(id);
+        }else if (userRoles[0].equals("2")) {
+            User user = myUserService.getUserById(userId);
             user.addRole(myUserService.getRole(2L));
             myUserService.editUser(user);
 
         }
-        return "redirect:/admin";
+        return String.format("redirect:/admin/edit/%d", userId);
     }
 
 }

@@ -6,13 +6,13 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.kata.spring.boot_security.demo.dao.Dao;
+import ru.kata.spring.boot_security.demo.dao.DaoRole;
 import ru.kata.spring.boot_security.demo.dao.UserDao;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,10 +21,12 @@ import java.util.Set;
 public class UserService implements UserDetailsService, MyUserService {
 
     private Dao userDao;
+    private DaoRole roleDao;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserService(UserDao userDao, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserService(Dao userDao, DaoRole roleDao, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userDao = userDao;
+        this.roleDao = roleDao;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
@@ -40,20 +42,20 @@ public class UserService implements UserDetailsService, MyUserService {
         user.setId(1L);
         Role admin = new Role("ROLE_ADMIN");
         admin.setId(2L);
-        userDao.addRole(user);
-        userDao.addRole(admin);
+        roleDao.addRole(user);
+        roleDao.addRole(admin);
         User user1 = new User(bCryptPasswordEncoder.encode("pass1"), "user1");
         Set<Role> user1Rols = new HashSet<>();
-        user1Rols.add(userDao.getRole(2L));
+        user1Rols.add(roleDao.getRole(2L));
         user1.setRole(user1Rols);
         userDao.addUser(user1);
 
 
-
     }
+
     @Override
     public User getUserById(Long id) {
-        return  userDao.getUserById(id);
+        return userDao.getUserById(id);
     }
 
     @Override
@@ -63,6 +65,7 @@ public class UserService implements UserDetailsService, MyUserService {
 
     @Override
     public void addUser(User user) {
+
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userDao.addUser(user);
 
@@ -70,6 +73,9 @@ public class UserService implements UserDetailsService, MyUserService {
 
     @Override
     public void editUser(User user) {
+        if (!bCryptPasswordEncoder.matches(user.getPassword(), getUserById(user.getId()).getPassword())) {
+            user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        }
         userDao.editUser(user);
 
     }
@@ -81,12 +87,19 @@ public class UserService implements UserDetailsService, MyUserService {
     }
 
     @Override
-    public Role getRole (Long roleName){
-        return userDao.getRole(roleName);
+    public Role getRole(Long roleName) {
+        return roleDao.getRole(roleName);
     }
+
     @Override
-    public String decoding(String codingPass){
+    public String decoding(String codingPass) {
         BCryptPasswordEncoder bc = new BCryptPasswordEncoder();
         return bCryptPasswordEncoder.encode(bc.encode(codingPass));
     }
+
+    @Override
+    public String[] arrayRoles() {
+        return roleDao.arrayRole();
+    }
+
 }
