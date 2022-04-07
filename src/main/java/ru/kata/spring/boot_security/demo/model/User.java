@@ -10,10 +10,13 @@ import java.util.*;
 @Table(name = "table_user")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(name = "password", unique = true, updatable = false)
+    @Column(name = "user_Age")
+    private Long age;
+
+    @Column(name = "password", unique = true)
     private String password;
 
     @Column(name = "user_name", unique = true)
@@ -29,9 +32,18 @@ public class User implements UserDetails {
     }
 
 
-    public User(String password, String userName) {
+    public User(String password, String userName, Long age) {
         this.password = password;
         this.userName = userName;
+        this.age = age;
+    }
+
+    public Long getAge() {
+        return age;
+    }
+
+    public void setAge(Long age) {
+        this.age = age;
     }
 
     public String getUserName() {

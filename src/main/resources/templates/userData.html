@@ -1,31 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Users</title>
 
 </head>
 <body>
-<table border="1">
-    <thead>
-    <tr>
-        <th>User name</th>
-        <th>Password</th>
-        <th>ID</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:object="${userD}" >
-        <td th:text = "${userD.getUsername()}"></td>
-        <td th:text = "${userD.getPassword()}"></td>
-        <td th:text="${userD.getId()}"></td>
-    </tr>
-    </tbody>
-</table>
-<br>
-<form name="logOut" th:action="@{/logout}" method="post">
-    <input type="submit" value="Exit">
-</form>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+            <nav class="navbar navbar-default navbar-light bg-light static-top navbar-dark bg-dark">
+                <div class="navbar-header">
+                    <a class="nav-link disabled text-white font-weight-bold" href="#">
+                        [[*{authUserName}]] With role: [[*{authUserRole}]]</a>
+                </div>
+                <div class="navbar-form navbar-right">
+                    <form name="logOut" th:action="@{/logout}" method="post">
+                        <input class="btn btn-primary " type="submit" value="Exit">
+                    </form>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="nav flex-column nav-pills" id="v-pills-tab"
+                         role="tablist" aria-orientation="vertical">
+
+                        <a class="nav-link active" id="v-pills-User-tab"
+                           data-toggle="pill" href="#v-pills-User"
+                           role="tab" aria-controls="v-pills-User"
+                           aria-selected="false">User</a>
+
+                    </div>
+                </div>
+
+                <div class="col-md-9 shadow-none p-3 mb-5 bg-light rounded">
+                    <div class="tab-content" id="v-pills-tabContent">
+                        <div class="ab-pane fade show active" id="v-pills-User"
+                             role="tabpanel" aria-labelledby="v-pills-profile-tab">
+                            <h4>User</h4>
+
+                            <div class="col-sm-12">
+                                <table class="table table-striped shadow-sm p-3 mb-5 bg-white rounded">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">User ID</th>
+                                        <th scope="col">User name</th>
+                                        <th scope="col">Age</th>
+                                        <th scope="col">Role</th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    <th scope="row" th:text="${userD.id}"></th>
+                                    <td th:text="${userD.userName}"></td>
+                                    <td th:text="${userD.age}"></td>
+                                    <td>
+                                        <dl th:each="role : ${userD.roles}">
+                                            <dd th:text="${role.role}"></dd>
+                                        </dl>
+                                    </td>
+
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="https://yastatic.net/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
 </body>
 </html>

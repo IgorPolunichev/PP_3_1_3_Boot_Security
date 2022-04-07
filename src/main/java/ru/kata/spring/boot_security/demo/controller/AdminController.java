@@ -1,6 +1,15 @@
 package ru.kata.spring.boot_security.demo.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.fasterxml.jackson.databind.util.JSONWrappedObject;
+import com.mysql.cj.xdevapi.JsonArray;
+import com.mysql.cj.xdevapi.JsonValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -9,7 +18,9 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.services.MyUserService;
 
+import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpServletRequest;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -21,24 +32,28 @@ public class AdminController {
 
     @GetMapping
     public String showUsers(ModelMap model) {
+        User auth = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         model.addAttribute("users", myUserService.listUser());
-        return "adminData";
+        model.addAttribute("authUserName", myUserService.getUserById(auth.getId()).getUserName());
+        StringBuilder sb = new StringBuilder();
+        for (Role r : myUserService.getUserById(auth.getId()).getRoles()) {
+            if (r.getRole().equals("ROLE_ADMIN")) {
+                sb.append("ADMIN ");
+            }
+            if (r.getRole().equals("ROLE_USER")) {
+                sb.append("USER ");
+            }
+        }
+        model.addAttribute("authUserRole", sb.toString());
+        model.addAttribute("authUser", auth);
+        return "test";
     }
 
-    @GetMapping(value = "/addUser")
-    public String addUser(Model model) {
-        User user = new User();
-        model.addAttribute("newUser", user);
-        return "newUser";
-    }
 
     @PostMapping(value = "/addUser")
-    public String createUser(@ModelAttribute("newUser") User user, HttpServletRequest request) {
+    public String createUser(User user, HttpServletRequest request) {
         Set<Role> roles = new HashSet<>();
         String[] userRoles = request.getParameterValues("role1");
-//        User user1 = new User();
-//        user1.setPassword(user.getPassword());
-//        user1.setUserName(user.getUserName());
         for (String roleId : userRoles) {
             if (Long.parseLong(roleId) == 2L) {
                 roles.add(myUserService.getRole(2L));
@@ -58,48 +73,39 @@ public class AdminController {
         return "redirect:/admin ";
     }
 
-
-    @GetMapping(value = "/edit/{id}")
-    public String editUser(@PathVariable("id") Long id, ModelMap model) {
-        model.addAttribute("user", myUserService.getUserById(id));
-        return "editUser";
+    @RequestMapping("/getUserById/{id}")
+    @ResponseBody
+    public HashMap<String, String[]> getUserById(@PathVariable("id") Long id) throws JsonProcessingException {
+        User user = myUserService.getUserById(id);
+        HashMap<String, String[]>  test= new HashMap<>();
+        List<String> t = user.getRoles().stream().map(Role::getRole).toList();
+        test.put("userId", new String[]{user.getId().toString()});
+        test.put("userName", new String[]{user.getUserName()});
+        test.put("userAge", new String[]{user.getAge().toString()});
+        test.put("userRoles", t.toArray(new String[0]));
+        return test;
     }
 
-    @PatchMapping("/edit/{id}")
-    public String update(@ModelAttribute("user") User user,
-                         @PathVariable("id") Long id) {
+    @RequestMapping("/update")
 
-        Set<Role> role = myUserService.getUserById(id).getRoles();
+    public String update(User user
+            , HttpServletRequest request) {
+        String[] userRoles = request.getParameterValues("role1");
+        Set<Role> role = new HashSet<>();
+        for (String s : userRoles) {
+            if (s.equals("1")) {
+                role.add(myUserService.getRole(1L));
+            }
+            if (s.equals("2")) {
+                role.add(myUserService.getRole(2L));
+            }
+        }
+        if (user.getPassword().equals("")) {
+            user.setPassword(myUserService.getUserById(user.getId()).getPassword());
+        }
         user.setRole(role);
         myUserService.editUser(user);
         return "redirect:/admin ";
-    }
-
-    @DeleteMapping(value = "/removeRole/{user_id}/{role_id}")
-    public String deleteUserRole(@PathVariable(name = "user_id") Long userId,
-                                 @PathVariable(name = "role_id") Long roleId) {
-        Set<Role> userRole = myUserService.getUserById(userId).getRoles();
-        userRole = userRole.stream().filter(e -> e.getId() != roleId).collect(Collectors.toSet());
-        User user = myUserService.getUserById(userId);
-        user.setRole(userRole);
-        myUserService.editUser(user);
-        return String.format("redirect:/admin/edit/%d", userId);
-    }
-
-    @PatchMapping("/addRole/{user_id}")
-    public String addRole(HttpServletRequest request, @PathVariable("user_id") Long userId) {
-        String[] userRoles = request.getParameterValues("addRole");
-        if (userRoles[0].equals("1")) {
-            User user = myUserService.getUserById(userId);
-            user.addRole(myUserService.getRole(1L));
-            myUserService.editUser(user);
-        }else if (userRoles[0].equals("2")) {
-            User user = myUserService.getUserById(userId);
-            user.addRole(myUserService.getRole(2L));
-            myUserService.editUser(user);
-
-        }
-        return String.format("redirect:/admin/edit/%d", userId);
     }
 
 }

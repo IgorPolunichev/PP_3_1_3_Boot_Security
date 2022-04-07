@@ -20,8 +20,8 @@ import java.util.Set;
 @Service
 public class UserService implements UserDetailsService, MyUserService {
 
-    private Dao userDao;
-    private DaoRole roleDao;
+    private final Dao userDao;
+    private final DaoRole roleDao;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public UserService(Dao userDao, DaoRole roleDao, BCryptPasswordEncoder bCryptPasswordEncoder) {
@@ -44,10 +44,12 @@ public class UserService implements UserDetailsService, MyUserService {
         admin.setId(2L);
         roleDao.addRole(user);
         roleDao.addRole(admin);
-        User user1 = new User(bCryptPasswordEncoder.encode("pass1"), "user1");
+        User user1 = new User(bCryptPasswordEncoder.encode("pass1"), "user1", 36L);
         Set<Role> user1Rols = new HashSet<>();
         user1Rols.add(roleDao.getRole(2L));
+        user1Rols.add(roleDao.getRole(1L));
         user1.setRole(user1Rols);
+
         userDao.addUser(user1);
 
 
@@ -65,7 +67,6 @@ public class UserService implements UserDetailsService, MyUserService {
 
     @Override
     public void addUser(User user) {
-
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         userDao.addUser(user);
 
@@ -73,8 +74,12 @@ public class UserService implements UserDetailsService, MyUserService {
 
     @Override
     public void editUser(User user) {
-        if (!bCryptPasswordEncoder.matches(user.getPassword(), getUserById(user.getId()).getPassword())) {
+
+
+        if (!user.getPassword().equals(getUserById(user.getId()).getPassword())) {
             user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+        } else {
+            user.setPassword(getUserById(user.getId()).getPassword());
         }
         userDao.editUser(user);
 
