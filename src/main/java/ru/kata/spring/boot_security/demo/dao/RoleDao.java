@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.dao;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
@@ -27,7 +29,14 @@ public class RoleDao implements DaoRole{
 
     @Override
     public Role getRole(Long role) {
-        return entityManager.find(Role.class, role);
+        SessionFactory sessionFactory =  entityManager.getEntityManagerFactory().unwrap(SessionFactory.class);
+        Session session = sessionFactory.openSession();
+        session.beginTransaction();
+        Role role1 = session.get(Role.class,role);
+        session.close();
+        return role1;
+
+//        return entityManager.find(Role.class, role);
     }
 
     @Override

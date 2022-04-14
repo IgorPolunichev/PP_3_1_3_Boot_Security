@@ -20,7 +20,7 @@ public class UserController {
     public String showUserData( Model model, Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         user.setPassword(myUserService.decoding(user.getPassword()));
-        model.addAttribute("userD",user);
+        model.addAttribute("userD",myUserService.getUserById(user.getId()));
         model.addAttribute("authUserName", user.getUserName());
         StringBuilder sb = new StringBuilder();
         for (Role r : user.getRoles()) {

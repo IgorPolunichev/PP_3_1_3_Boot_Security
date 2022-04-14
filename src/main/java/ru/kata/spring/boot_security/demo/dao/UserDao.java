@@ -1,6 +1,10 @@
 package ru.kata.spring.boot_security.demo.dao;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.BeanCreationException;
+
 import org.springframework.stereotype.Repository;
 import ru.kata.spring.boot_security.demo.model.User;
 
@@ -31,8 +35,9 @@ public class UserDao implements Dao {
         String sql = String.format("select u from User u where u.userName = '%s'", user.getUserName());
         try {
             User user1 = (User) entityManager.createQuery(sql).getSingleResult();
+
         }catch (BeanCreationException | NoResultException ignore){
-            entityManager.persist(user);
+                entityManager.persist(user);
         }
     }
 
@@ -45,6 +50,7 @@ public class UserDao implements Dao {
     @Override
     @SuppressWarnings("unchecked")
     public List<User> listUser() {
+
         return entityManager.createQuery("select u from User u", User.class).getResultList();
     }
 

@@ -1,5 +1,7 @@
 package ru.kata.spring.boot_security.demo.services;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -13,6 +15,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +36,24 @@ public class UserService implements UserDetailsService, MyUserService {
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userDao.findByUserName(username);
+        User user = userDao.findByUserName(username);
+        List<GrantedAuthority> grantedAuthorities = buildUserAuthority(user.getRoles());
+        return buildUserForAuthentication(user);
+    }
+
+    private List<GrantedAuthority> buildUserAuthority(Set<Role> userRole) {
+        Set<GrantedAuthority> setAuth = new HashSet<>();
+        for (Role role : userRole) {
+            setAuth.add(new SimpleGrantedAuthority(role.getRole()));
+        }
+        List<GrantedAuthority> res = new ArrayList<>(setAuth);
+        return res;
+    }
+
+    private User buildUserForAuthentication(User user) {
+        User user1 = new User(user.getUserName() , user.getPassword(), user.getAge(), user.getRoles());
+        user1.setId(user.getId());
+        return user1;
     }
 
 
@@ -44,7 +64,7 @@ public class UserService implements UserDetailsService, MyUserService {
         admin.setId(2L);
         roleDao.addRole(user);
         roleDao.addRole(admin);
-        User user1 = new User(bCryptPasswordEncoder.encode("pass1"), "user1", 36L);
+        User user1 = new User( "user1", bCryptPasswordEncoder.encode("pass1"), 36L);
         Set<Role> user1Rols = new HashSet<>();
         user1Rols.add(roleDao.getRole(2L));
         user1Rols.add(roleDao.getRole(1L));
